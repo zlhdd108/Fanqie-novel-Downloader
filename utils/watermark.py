@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-水印处理模块 - 增强版（仅章节末尾 + 强防护，保持URL可点击性）
+文本处理模块 - 精简版（无水印版本）
 """
 
 import random
@@ -10,7 +10,7 @@ import time
 
 URL_PATTERN = re.compile(r"(https?://[^\s]+)")
 
-# 扩展隐形字符集（这些字符不会影响URL识别）
+# 扩展隐形字符集
 ENHANCED_INVISIBLE_CHARS = [
     '\u200B',  # 零宽空格 Zero-width space
     '\u200C',  # 零宽非连接符 Zero-width non-joiner
@@ -94,7 +94,7 @@ def add_enhanced_invisible_chars(text: str) -> str:
 
 
 def add_zero_width_to_url(url: str, insertion_rate: float = 0.4) -> str:
-    """在URL内部插入零宽字符，降低批量替换概率"""
+    """在URL内部插入零宽字符"""
     if not url:
         return url
 
@@ -198,83 +198,29 @@ def add_invisible_chars_to_text(text: str, insertion_rate: float = 0.3) -> str:
 
 def insert_watermark(content: str, watermark_text: str | None = None, num_insertions: int | None = None) -> str:
     """
-    ⚠️ 已弃用：此函数会在文章中间插入水印，影响阅读体验
-    建议使用 apply_watermark_to_chapter() 替代
-
+    已弃用函数，直接返回原始内容
+    
     Args:
         content: 原始内容
         watermark_text: 水印文本，默认为官方水印文本
         num_insertions: 插入次数，如果为None则根据内容长度自动计算
 
     Returns:
-        原始内容（不再插入水印）
+        原始内容
     """
-    # 为了向后兼容，保留函数但不执行插入操作
-    print("警告：insert_watermark 函数已弃用，请使用 apply_watermark_to_chapter()")
-    return content  # 直接返回原内容，不插入水印
+    # 直接返回原内容，不插入水印
+    return content
 
 
 def apply_watermark_to_chapter(content: str) -> str:
     """
-    在正文内随机插入水印 - 每50000字插入一次，多层防护，保持URL完全可点击
-
+    空函数，不应用任何水印，直接返回原始内容
+    
     Args:
         content: 章节内容
 
     Returns:
-        处理后的内容
+        原始内容
     """
-    if not content:
-        return content
-
-    plain_url = "https://github.com/POf-L/Fanqie-novel-Downloader"
-    hardened_url = add_zero_width_to_url(plain_url)
-
-    # 新的水印文本
-    visible_watermark = f"【使用此项目进行下载：{plain_url}】"
-    hardened_watermark = visible_watermark.replace(plain_url, hardened_url, 1)
-    base_watermark = add_enhanced_invisible_chars(hardened_watermark)
-
-    # 应用多层防护（仅使用隐形字符，不改变可见字符）
-    protected_watermark = apply_multi_layer_protection(base_watermark, content)
-
-    content_length = len(content)
-    interval = 50000
-
-    # 如果内容少于50000字，在中间位置插入一次
-    if content_length < interval:
-        # 在中间位置随机插入（中间位置±20%范围内）
-        mid_point = content_length // 2
-        variation = int(content_length * 0.2)
-        insert_pos = random.randint(max(0, mid_point - variation), min(content_length, mid_point + variation))
-
-        # 插入水印（前后加换行）
-        watermark_with_newlines = '\n' + protected_watermark + '\n'
-        final_content = content[:insert_pos] + watermark_with_newlines + content[insert_pos:]
-        return final_content
-
-    # 如果内容大于等于50000字，每50000字插入一次
-    num_insertions = content_length // interval
-
-    # 计算插入位置（在每个区间内随机选择位置）
-    insert_positions = []
-    for i in range(num_insertions):
-        # 每个区间的起始和结束位置
-        segment_start = i * interval
-        segment_end = (i + 1) * interval
-
-        # 在区间内随机选择位置（避免太靠近边界）
-        margin = int(interval * 0.1)  # 10%的边界
-        insert_pos = random.randint(segment_start + margin, segment_end - margin)
-        insert_positions.append(insert_pos)
-
-    # 从后往前插入，避免位置偏移
-    insert_positions.sort(reverse=True)
-
-    result = content
-    watermark_with_newlines = '\n' + protected_watermark + '\n'
-
-    for pos in insert_positions:
-        result = result[:pos] + watermark_with_newlines + result[pos:]
-
-    return result
+    # 直接返回原内容，不插入水印
+    return content
